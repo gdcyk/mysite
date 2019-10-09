@@ -1,0 +1,10 @@
+{% extends 'blog_list.html' %}
+
+{# 页面标题 #}
+{% block title %}个人博客-{{ blog_date.year}}-{{ blog_date.month }}-{{ blog_date.day }}{% endblock %}
+
+{% block left-panel-heading-type %}-{{ blog_date.year}}-{{ blog_date.month }}-{{ blog_date.day }}
+    <a href="{% url "blog_list" %}">
+        全部列表
+    </a>
+{% endblock %}

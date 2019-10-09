@@ -1,0 +1,50 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+/*内容和分类栏往下移,不要被顶头的栏遮住了*/
+body {
+    margin-top: 70px!important;
+}
+
+.blog {
+     margin-left: 70px;
+}
+
+.blog-classify {
+    margin-right: 70px;
+}
+
+.blog_home {
+    margin-top: 70px!important;
+    text-align: center;
+    font-size: 222%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+div.paginator {
+    text-align: center;
+}
+
+div.comment {
+    border-bottom: 1px dashed #cccccc;
+    margin-bottom: 0.5em;
+    padding-bottom: 0.5em;
+}
+
+div.reply {
+    margin-left: 2em;
+}
+
+div.likes{
+    color: #006ce0;
+    text-decoration: none;
+}
+
+div.likes .active{
+    color: #f7a35c;
+}

@@ -1,0 +1,135 @@
+{% extends 'blog/blog_base.html' %}
+
+{% load staticfiles %}
+
+{% block header_extends %}
+{#    highchart#}
+    <script type="text/javascript" src="{% static 'Highcharts-7.2.0/code/highcharts.js' %}"></script>
+    <script type="text/javascript" src="{% static 'Highcharts-7.2.0/code/modules/exporting.js' %}"></script>
+{#    <script type="text/javascript" src="{% static 'Highcharts-7.2.0/code/modules/series-label.js' %}"></script>#}
+{#    <script type="text/javascript" src="{% static 'Highcharts-7.2.0/code/modules/oldie.js' %}"></script>#}
+    <script type="text/javascript" src="{% static 'Highcharts-7.2.0/code/highcharts-zh_CN.js' %}"></script>
+{% endblock %}
+
+{% block title %}个人博客-首页{% endblock %}
+
+{% block nav_home_active %}active{% endblock %}
+
+{% block content %}
+{#    {% for title, readnum in dict_of_blog_read.items %}#}
+{#        <p>{{ title|truncatechars:10 }}:{{ readnum }}</p>#}
+{#        <br>#}
+{#    {% endfor %}#}
+    <div id="container" style="width:400px;height:400px"></div>
+    <script>
+    var chart = Highcharts.chart('container',{
+        chart: {
+            type: 'column'//图表类型 默认折线图，可以把这个改其他参数观察变化
+            //type: 'line'//图表类型 默认折线图，可以把这个改其他参数观察变化
+            //这里可以设置回调函数完成后执行
+        },
+
+        title: {
+            text: '博客文章排行榜'
+        },
+        // subtitle: {
+        // 	text: '数据来源: WorldClimate.com'
+        // },
+        xAxis: {
+            categories: {{ dict_of_blog_read_keys|safe }},
+            crosshair: true,//配置跟随鼠标或鼠标滑过点时的十字准星线
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: '总阅读量'
+            }
+        },/*数据提示框指的当鼠标悬停在某点上时，以框的形式提示该点的数据，比如该点的值，数据单位等。数据提示框内提示的信息完全可以通过格式化函数动态指定；通过设置 tooltip.enabled = false 即可不启用提示框。
+        教程地址：https://www.hcharts.cn/docs/basic-tooltip*/
+        tooltip: {
+            // head + 每个 point + footer 拼接成完整的 table
+            headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+            pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+            '<td style="padding:0"><b>{point.y:.1f} mm</b></td></tr>',
+            footerFormat: '</table>',
+            shared: true,
+            useHTML: true
+        },
+        credits: {
+            enabled: false,                    // 默认值，如果想去掉版权信息，设置为false即可
+            text: 'www.hcharts.cn',             // 显示的文字
+            href: 'http://www.hcharts.cn',      // 链接地址
+            // position: {                         // 位置设置
+            // 	align: 'left',
+            // 	x: 400,
+            // 	verticalAlign: 'bottom',
+            // 	y: -100
+            // },
+            // style: {                            // 样式设置
+            // 	cursor: 'pointer',
+            // 	color: 'red',
+            // 	fontSize: '30px'
+            // }
+        },
+        /*
+        数据列配置是针对所有数据列及某种数据列有效的通用配置。
+
+        数据列的配置有三个级别：
+
+        配置在 plotOptions.series，针对所有图表类型有效
+        配置在 plotOptions.<数据列类型>，针对某种数据列有效
+        配置在 series，针对某个数据列有效
+        上述三个级别的配置精准度越来越高，也就是越精准的配置会覆盖前面的配置
+        */
+        plotOptions: {
+            column: {
+                borderWidth: 0
+            }
+        },
+        series: [{
+            name: '七天统计',
+            data: {{ dict_of_blog_read_values }}
+        },
+        ]
+    });
+    </script>
+{#    <script type="text/javascript" src="{% static 'bar_chart.js' %}"></script>#}
+
+{#    {% for blog in read_num_for_seven_day %}#}
+{#        <p>{{ blog.content_object.title|safe}}:{{ blog.read_num_sum }}</p>#}
+{#    {% endfor %}#}
+
+    <div class="hot-data">
+        <h3>昨天热门博客</h3>
+        <ul>
+            {% for hot_data in get_yesterday_hot_data %}
+                <li>
+                    <a href="{% url "blog_detail" hot_data.content_object.pk %}">
+                        {{ hot_data.content_object.title }}({{ hot_data.read_num }})
+                    </a>
+                </li>
+            {% empty %}
+                <li>昨天暂时没有热门博客</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="hot-data-seven-day">
+        <h3>7天热门博客</h3>
+        <ul>
+            {% for hot_data in get_seven_day_hot_blog %}
+                <li>
+                    <a href="{% url "blog_detail" hot_data.pk %}">
+                        {{ hot_data.title|truncatechars:10 }}({{ hot_data.read_num_sum }})
+                    </a>
+                </li>
+            {% empty %}
+                <li>昨天暂时没有热门博客</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="blog_home">
+        欢迎来到我的博客-随便看看
+    </div>
+
+{% endblock %}

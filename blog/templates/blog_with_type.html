@@ -1,0 +1,10 @@
+{% extends 'blog_list.html' %}
+
+{# 页面标题 #}
+{% block title %}个人博客-{{ blog_type.type_name }}{% endblock %}
+
+{% block left-panel-heading-type %}-{{ blog_type.type_name }}
+    <a href="{% url "blog_list" %}">
+        全部列表
+    </a>
+{% endblock %}
