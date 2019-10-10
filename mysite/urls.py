@@ -20,7 +20,7 @@ from django.conf import settings
 
 from blog.views import blog_home
 from comment.views import login, register
-from likes.views import likes_change
+from likes.views import like_change
 
 urlpatterns = [
     path('', blog_home, name='home'),
@@ -30,7 +30,7 @@ urlpatterns = [
     path('comment/', include("comment.urls")),
     path('login/', login, name='login'),
     path('register/', register, name="register"),
-    path('likes/', likes_change, name="likes")
+    path('like/', like_change, name="like")
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
