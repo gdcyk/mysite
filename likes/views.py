@@ -36,9 +36,10 @@ def like_change(request):
         # 目标不存在
         return error_respond(401, "object does not exists.")
 
-    is_likes = request.GET.get("is_like")
+    is_likes = LikeRecord.objects.filter(content_type=content_type, object_id=object_id, user=user).exists()
 
-    if is_likes:
+    print(is_likes)
+    if not is_likes:
         # 要点赞
         like_record, create = LikeRecord.objects.get_or_create(content_type=content_type, object_id=object_id, user=user)
         if create:
@@ -51,18 +52,13 @@ def like_change(request):
             # 目标已存在,请勿重复点赞
             return error_respond(402, "object already exists.")
     else:
-        # 取消点赞
-        if LikeRecord.objects.filter(content_type=content_type, object_id=object_id, user=user).exists():
-            # 有目标,删除目标
-            like_record = LikeRecord.objects.get(content_type=content_type, object_id=object_id, user=user)
-            like_record.delete()
-            like_count, created = LikeCount.objects.get_or_create(content_type=content_type, object_id=object_id)
-            if not created:
-                like_count.likes_num -= 1
-                return success_respond(like_count.likes_num)
-            else:
-                return error_respond(403, "object doesn't exists.")
-
+        # 有目标,删除目标
+        like_record = LikeRecord.objects.get(content_type=content_type, object_id=object_id, user=user)
+        like_record.delete()
+        like_count, created = LikeCount.objects.get_or_create(content_type=content_type, object_id=object_id)
+        if not created:
+            like_count.likes_num -= 1
+            like_count.save()
+            return success_respond(like_count.likes_num)
         else:
-            # 没有目标,报错
             return error_respond(403, "object doesn't exists.")

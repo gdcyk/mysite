@@ -1,6 +1,7 @@
 {% extends 'blog_list.html' %}
 {% load staticfiles %}
 {% load comment_tags %}
+{% load like_tags %}
 
 {% block header_extends %}
     <script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
@@ -28,8 +29,8 @@
         <p>{{ blog.blog_type }}</p>
     </a>
     <div class="like" onclick="likeChange(this, 'blog', {{ blog.pk }})">
-        <span class="glyphicon glyphicon-thumbs-up"></span>
-        <span class="likes_num">(0)</span>
+        <span class="glyphicon glyphicon-thumbs-up {% get_like_status blog %}"></span>
+        <span class="likes_num">{% get_like_count blog %}</span>
         <span>喜欢</span>
     </div>
     <div>{{ blog.content|safe }}</div>
@@ -93,6 +94,11 @@
                         {{ comment.text|safe }}
                     </div>
                     <a href="javascript:reply({{ comment.pk }})">回复</a>
+                    <div class="like" onclick="likeChange(this, 'comment', {{ comment.pk }})">
+                        <span class="glyphicon glyphicon-thumbs-up {% get_like_status comment %}"></span>
+                        <span class="likes_num">{% get_like_count comment %}</span>
+                        <span>喜欢</span>
+                    </div>
 
                     {% for reply in comment.root_comment.all %}
                     <div class="reply">
@@ -104,6 +110,11 @@
                             {{ reply.text|safe }}
                         </div>
                         <a href="javascript:reply({{ reply.pk }})">回复</a>
+                        <div class="like" onclick="likeChange(this, 'comment', {{ reply.pk }})">
+                            <span class="glyphicon glyphicon-thumbs-up {% get_like_status reply %}"></span>
+                            <span class="likes_num">{% get_like_count reply %}</span>
+                            <span>喜欢</span>
+                        </div>
                     </div>
                     {% endfor %}
                 </div>
@@ -118,7 +129,7 @@
 {% block script_extends %}
     <script type="text/javascript">
         function likeChange(obj, content_type, object_id){
-            var is_like = obj.getElementsByClassName("active").length === 0;
+            var is_like = obj.getElementsByClassName("active").length !== 0;
             $.ajax({
                 url:"{% url "like" %}",
                 type: "GET",
@@ -129,13 +140,27 @@
                 },
                 cache: false,
                 success: function (data) {
-                    console.log("success");
                     console.log(data);
-                    alert(data["status"]);
+                    if (data["status"] === "SUCCESS"){
+                        var element = $(obj.getElementsByClassName("glyphicon"));
+                        if (is_like){
+                            element.removeClass("active");
+                            console.log(is_like);
+                        }
+                        else {
+                            element.addClass("active");
+                            console.log(is_like);
+                        }
+                        var like_num = $(obj.getElementsByClassName("likes_num"));
+                        like_num.text(data["like_num"]);
+                        console.log(element);
+                    }
+                    else{
+                        alert(data["code"] + " " + data["message"])
+                    }
                 },
                 error: function (xhr) {
                     console.log(xhr);
-                    alert(xhr["status"]);
                 }
             })
         }
