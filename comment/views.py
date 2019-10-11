@@ -32,6 +32,19 @@ def login(request):
     context['login_forms'] = login_forms
     return render(request, "login.html", context=context)
 
+# Create your views here.
+def login_for_modal(request):
+    login_forms = LoginForm(request.POST)
+    data = {}
+    if login_forms.is_valid():
+        usr = login_forms.cleaned_data["usr"]
+        auth.login(request, usr)
+        print(request.GET.get("from", reverse("home")))
+        data["status"] = "SUCCESS"
+    else:
+        data["status"] = "ERROR"
+    return JsonResponse(data)
+
 def register(request):
     if request.method == "POST":
         register_forms = RegisterForm(request.POST)
@@ -80,9 +93,21 @@ def update_comment(request):
         else:
             data["reply_to"] = ""
         data["pk"] = comment.pk
+        data["content_type"] = ContentType.objects.get_for_model(comment).model
         data['root_pk'] = comment.root.pk if not comment.root is None else ''
         print("data['root_pk']:{}".format(data['root_pk']))
     else:
         data["status"] = "ERROR"
         data["message"] = list(comment_form.errors.values())[0][0]
     return JsonResponse(data)
+
+def logout(request):
+    user = request.user
+    if user.is_authenticated:
+        auth.logout(request=request)
+    referer = request.META.get("HTTP_REFERER", "home")
+    print(referer)
+    return redirect(referer)
+
+def user_info(request):
+    return render(request, "user_info.html", context=None)

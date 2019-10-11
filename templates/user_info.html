@@ -1,0 +1,12 @@
+{% extends 'blog/blog_base.html' %}
+{% load staticfiles %}
+{% load comment_tags %}
+{% load like_tags %}
+
+
+{% block title %}个人博客-用户信息{% endblock %}
+
+{% block content %}
+    {{ user.username }}
+    {{ user.email }}
+{% endblock %}

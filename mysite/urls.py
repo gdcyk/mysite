@@ -19,7 +19,7 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 from blog.views import blog_home
-from comment.views import login, register
+from comment.views import login, register, login_for_modal, logout, user_info
 from likes.views import like_change
 
 urlpatterns = [
@@ -29,6 +29,9 @@ urlpatterns = [
     path('blog/', include('blog.urls')),
     path('comment/', include("comment.urls")),
     path('login/', login, name='login'),
+    path('logout/', logout, name='logout'),
+    path('user_info/', user_info, name='user_info'),
+    path('login_for_modal/', login_for_modal, name='login_for_modal'),
     path('register/', register, name="register"),
     path('like/', like_change, name="like")
 ]

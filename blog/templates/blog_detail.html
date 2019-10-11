@@ -101,21 +101,21 @@
                     </div>
 
                     {% for reply in comment.root_comment.all %}
-                    <div class="reply">
-                        {{ reply.username }}
-                        ({{ reply.comment_time|date:"Y-m-d H:i:s" }})：
-                        回复
-                        {{ reply.reply_to.username }}
-                        <div id="comment_{{ reply.pk }}">
-                            {{ reply.text|safe }}
+                        <div class="reply">
+                            {{ reply.username }}
+                            ({{ reply.comment_time|date:"Y-m-d H:i:s" }})：
+                            回复
+                            {{ reply.reply_to.username }}
+                            <div id="comment_{{ reply.pk }}">
+                                {{ reply.text|safe }}
+                            </div>
+                            <a href="javascript:reply({{ reply.pk }})">回复</a>
+                            <div class="like" onclick="likeChange(this, 'comment', {{ reply.pk }})">
+                                <span class="glyphicon glyphicon-thumbs-up {% get_like_status reply %}"></span>
+                                <span class="likes_num">{% get_like_count reply %}</span>
+                                <span>喜欢</span>
+                            </div>
                         </div>
-                        <a href="javascript:reply({{ reply.pk }})">回复</a>
-                        <div class="like" onclick="likeChange(this, 'comment', {{ reply.pk }})">
-                            <span class="glyphicon glyphicon-thumbs-up {% get_like_status reply %}"></span>
-                            <span class="likes_num">{% get_like_count reply %}</span>
-                            <span>喜欢</span>
-                        </div>
-                    </div>
                     {% endfor %}
                 </div>
             {% empty %}
@@ -123,11 +123,49 @@
             {% endfor %}
         </div>
     </div>
+    <!--模态框-->
+    <!-- Modal -->
+    <div class="modal fade" id="modal_login" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <form id="modal_login_form" action="" method="post">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 class="modal-title" id="myModalLabel">登录</h4>
+                    </div>
+
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        {{ login_forms }}
+{#                        {% for field in login_forms %}#}
+{#                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>#}
+{#                            {{ field }}#}
+{#                        {% endfor %}#}
+                        <span id="modal_login_info" class="pull-left text-danger"></span>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">登录</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     {% block paginator %}{% endblock %}  {# 去除分页栏 #}
 {% endblock %}
 
 {% block script_extends %}
     <script type="text/javascript">
+        String.prototype.format = function(){
+            var str = this;
+            for (var i = 0; i < arguments.length; i++) {
+                str = str.replace(new RegExp('\\{' + i + '\\}', 'g'), arguments[i]);
+            }
+            return str;
+        };
         function likeChange(obj, content_type, object_id){
             var is_like = obj.getElementsByClassName("active").length !== 0;
             $.ajax({
@@ -156,7 +194,12 @@
                         console.log(element);
                     }
                     else{
-                        alert(data["code"] + " " + data["message"])
+                        if (data["code"]===400){
+                            $("#modal_login").modal("show");
+                        }
+                        else {
+                            alert(data["code"] + " " + data["message"])
+                        }
                     }
                 },
                 error: function (xhr) {
@@ -194,16 +237,42 @@
                     if(data['status']==="SUCCESS") {
                         if ($("#reply_comment_id").val() === '0'){
                             // 插入评论
-                            var comment_html = '<div id="root_' + data["pk"] + '" class="comment">' + data["username"] +
-                            '('+data["comment_time"] + ')' + '：' + '<div id="comment_' + data["pk"]+'">' +
-                            data["text"] + '</div>' + '<a href="javascript:reply(' + data["pk"] + ')">回复</a>' + '</div>';
+                            var comment_html ='<div id="root_{0}" class="comment">'+
+                                    '{1}'+
+                                    '({2})：'+
+                                    '<div id="comment_{0}">'+
+                                        '{3}'+
+                                    '</div>'+
+                                    '<a href="javascript:reply({0})">回复</a>'+
+                                    '<div class="like" onclick="likeChange(this, \'{4}\', {0})">'+
+                                        '<span class="glyphicon glyphicon-thumbs-up"></span>'+
+                                        '<span class="likes_num">0</span>'+
+                                        '<span>喜欢</span>'+
+                                    '</div>'+
+                                '</div>';
+                            comment_html = comment_html.format(data["pk"], data["username"], data["comment_time"],
+                                data["text"],data["content_type"]);
                             $("#comment_list").prepend(comment_html);
                             //$('html').animate({scrollTop: $('#root_' + data["pk"]).offset().top - 100}, 300);
+
                         }else {
                             //插入回复
-                            var reply_html = '<div class="reply">' + data["username"] + data["comment_time"] + ':' + "回复" + data["reply_to"] +
-                            '<div id="comment_' + data["pk"]+ '">' + data["text"] +
-                            '</div>' + '<a href="javascript:reply(' + data["pk"] + ')">回复</a>' + '</div>';
+                            var reply_html ='<div class="reply">'+
+                                    '{1}'+
+                                    '({2})：'+
+                                    '回复'+
+                                    '{3}'+
+                                    '<div id="comment_{0}">{4}</div>'+
+                                    '<div class="like" onclick="likeChange(this, \'{5}\', {0})">'+
+                                        '<span class="glyphicon glyphicon-thumbs-up\"></span> ' +
+                                        '<span class="likes-num">0</span>' +
+                                    '</div>'+
+                                    '<a href="javascript:reply({0});">回复</a>'+
+                                '</div>';
+                            console.log(reply_html);
+                            reply_html = reply_html.format(data["pk"],data["username"],data["comment_time"],
+                                data["reply_to"],data["text"],data["content_type"]);
+
                             $("#root_" + data['root_pk']).append(reply_html);
                             //$('html').animate({scrollTop: $('#root_'+ data['root_pk']).offset().top - 100}, 300);
                         }
@@ -226,5 +295,27 @@
             });
             return false;
         });
+        $("#modal_login_form").submit(function (event) {
+            event.preventDefault();
+            $.ajax({
+                url: "{% url 'login_for_modal' %}",
+                type: "POST",
+                data: $(this).serialize(),
+                cache: false,
+                success: function (data) {
+                    if(data["status"] === "SUCCESS"){
+                        console.log(data);
+                        window.location.reload();
+                    }
+                    else {
+                        console.log(data);
+                        $("#modal_login_info").text("用户或密码错误");
+                    }
+                },
+                error: function (xhr) {
+                    console.log(xhr);
+                },
+            })
+        })
     </script>
 {% endblock %}

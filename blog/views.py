@@ -10,6 +10,7 @@ from django.db.models import Q
 from django.db.models import Count, Sum
 
 from .models import Blog, BlogType
+from mysite.forms import LoginForm
 from comment.models import Comment
 from comment.forms import CommentForm
 from .util import get_yesterday_hot_data
@@ -185,9 +186,7 @@ def blog_detail(request, blog_pk):
     context['previous_blog'] = previous_blog
     context['next_blog'] = next_blog
     context['blog_types'] = BlogType.objects.annotate(blog_count=Count('blog'))
-    # ct = ContentType.objects.get_for_model(Blog) # 使用的是blog的模型
-    # comments = Comment.objects.filter(content_type=ct, object_id=current_blog.pk, parent=None).order_by("-comment_time")
-    # context['comments'] = comments
+    context['login_forms'] = LoginForm()
     blog_datetime(context)
     respond = render(request, 'blog_detail.html', context=context)
     respond.set_cookie(key, "True")
