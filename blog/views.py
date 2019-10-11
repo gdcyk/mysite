@@ -10,7 +10,7 @@ from django.db.models import Q
 from django.db.models import Count, Sum
 
 from .models import Blog, BlogType
-from mysite.forms import LoginForm
+from user.forms import LoginForm
 from comment.models import Comment
 from comment.forms import CommentForm
 from .util import get_yesterday_hot_data

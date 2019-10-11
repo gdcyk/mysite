@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'blog',
     'comment',
     'likes',
+    'user',
 ]
 
 MIDDLEWARE = [
@@ -61,11 +62,11 @@ ROOT_URLCONF = 'mysite.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')]
-        ,
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'user.context_processors.login_model_form',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
